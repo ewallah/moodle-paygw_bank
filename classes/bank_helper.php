@@ -33,18 +33,16 @@ require_once $CFG->libdir . '/filelib.php';
 use core_payment\helper as payment_helper;
 use stdClass;
 
-class bank_helper
-{
+class bank_helper {
 
 
-    public static function get_openbankentry($itemid, $userid): \stdClass
-    {
+
+    public static function get_openbankentry($itemid, $userid): \stdClass {
         global $DB;
         $record = $DB->get_record('paygw_bank', ['itemid' => $itemid, 'userid' => $userid, 'status' => 'P']);
         return $record;
     }
-    public static function check_hasfiles($id): \stdClass
-    {
+    public static function check_hasfiles($id): \stdClass {
         global $DB, $USER;
         $transaction = $DB->start_delegated_transaction();
         $record = $DB->get_record('paygw_bank', ['id' => $id]);
@@ -55,8 +53,7 @@ class bank_helper
         }
         return null;
     }
-    public static function aprobe_pay($id): \stdClass
-    {
+    public static function aprobe_pay($id): \stdClass {
         global $DB, $USER;
         $transaction = $DB->start_delegated_transaction();;
         $record = $DB->get_record('paygw_bank', ['id' => $id]);
@@ -78,13 +75,13 @@ class bank_helper
         $record->paymentid = $paymentid;
         $DB->update_record('paygw_bank', $record);
         payment_helper::deliver_order($record->component, $record->paymentarea, $record->itemid, $paymentid, (int) $record->userid);
-        $send_email = get_config('paygw_bank', 'sendconfmail');
-        if ($send_email) {
+        $sendemail = get_config('paygw_bank', 'sendconfmail');
+        if ($sendemail) {
             $supportuser = core_user::get_support_user();
-            $paymentuser=bank_helper::get_user($record->userid);
+            $paymentuser = self::get_user($record->userid);
             $fullname = fullname($paymentuser, true);
-            $userlang=$USER->lang;
-            $USER->lang=$paymentuser->lang;
+            $userlang = $USER->lang;
+            $USER->lang = $paymentuser->lang;
             $subject = get_string('mail_confirm_pay_subject', 'paygw_bank');
             $contentmessage = new stdClass;
             $contentmessage->username = $fullname;
@@ -92,11 +89,11 @@ class bank_helper
             $contentmessage->concept = $record->description;
             $mailcontent = get_string('mail_confirm_pay', 'paygw_bank', $contentmessage);
             email_to_user($paymentuser, $supportuser, $subject, $mailcontent);
-            $USER->lang=$userlang;
+            $USER->lang = $userlang;
         }
-        $send_email = get_config('paygw_bank', 'senconfirmailtosupport');
-        $emailaddress=get_config('paygw_bank', 'notificationsaddress');
-        if ($send_email) {
+        $sendemail = get_config('paygw_bank', 'senconfirmailtosupport');
+        $emailaddress = get_config('paygw_bank', 'notificationsaddress');
+        if ($sendemail) {
             $supportuser = core_user::get_support_user();
             $subject = get_string('email_notifications_subject_confirm', 'paygw_bank');
              $contentmessage = new stdClass;
@@ -112,42 +109,39 @@ class bank_helper
 
         return $record;
     }
-    public static function files($id): array
-    {
+    public static function files($id): array {
         $fs = get_file_storage();
         $files = $fs->get_area_files(\context_system::instance()->id, 'paygw_bank', 'transfer', $id);
-        $realfiles=array();
+        $realfiles = array();
         foreach ($files as $f) {
-            if($f->get_filename()!='.') {
+            if($f->get_filename() != '.') {
                 array_push($realfiles, $f);
             }
         }
         return $realfiles;
     }
-    public static function get_user($userid)
-    {
+    public static function get_user($userid) {
         global $DB;
         return $DB->get_record('user', ['id' => $userid]);
     }
-    public static function deny_pay($id): \stdClass
-    {
+    public static function deny_pay($id): \stdClass {
         global $DB, $USER;
         $transaction = $DB->start_delegated_transaction();;
         $record = $DB->get_record('paygw_bank', ['id' => $id]);
         $config = (object) payment_helper::get_gateway_configuration($record->component, $record->paymentarea, $record->itemid, 'bank');
         $payable = payment_helper::get_payable($record->component, $record->paymentarea, $record->itemid);
-        $paymentuser=bank_helper::get_user($record->userid);
+        $paymentuser = self::get_user($record->userid);
         $record->timechecked = time();
         $record->status = 'D';
         $record->usercheck = $USER->id;
         $DB->update_record('paygw_bank', $record);
-        $send_email = get_config('paygw_bank', 'senddenmail');
-        if ($send_email) {
+        $sendemail = get_config('paygw_bank', 'senddenmail');
+        if ($sendemail) {
             $supportuser = core_user::get_support_user();
             $fullname = fullname($paymentuser, true);
-            $userlang=$USER->lang;
-            $USER->lang=$paymentuser->lang;
-          
+            $userlang = $USER->lang;
+            $USER->lang = $paymentuser->lang;
+
             $subject = get_string('mail_denied_pay_subject', 'paygw_bank');
             $contentmessage = new stdClass;
             $contentmessage->username = $fullname;
@@ -155,26 +149,23 @@ class bank_helper
             $contentmessage->concept = $record->description;
             $mailcontent = get_string('mail_denied_pay', 'paygw_bank', $contentmessage);
             email_to_user($paymentuser, $supportuser, $subject, $mailcontent);
-            $USER->lang=$userlang;
+            $USER->lang = $userlang;
         }
         $transaction->allow_commit();
         return $record;
     }
 
-    public static function get_pending(): array
-    {
+    public static function get_pending(): array {
         global $DB;
         $records = $DB->get_records('paygw_bank', ['status' => 'P']);
         return $records;
     }
-    public static function get_user_pending($userid): array
-    {
+    public static function get_user_pending($userid): array {
         global $DB;
         $records = $DB->get_records('paygw_bank', ['status' => 'P', 'userid' => $userid]);
         return $records;
     }
-    public static function has_openbankentry($itemid, $userid): bool
-    {
+    public static function has_openbankentry($itemid, $userid): bool {
         global $DB;
         if ($DB->count_records('paygw_bank', ['itemid' => $itemid, 'userid' => $userid, 'status' => 'P']) > 0) {
             return true;
@@ -182,10 +173,9 @@ class bank_helper
             return false;
         }
     }
-    public static function create_bankentry($itemid, $userid, $totalamount, $currency, $component, $paymentarea, $description): \stdClass
-    {
+    public static function create_bankentry($itemid, $userid, $totalamount, $currency, $component, $paymentarea, $description): \stdClass {
         global $DB;
-        if (bank_helper::has_openbankentry($itemid, $userid)) {
+        if (self::has_openbankentry($itemid, $userid)) {
             return null;
         }
         $record = new \stdClass();
@@ -203,12 +193,12 @@ class bank_helper
 
         $id = $DB->insert_record('paygw_bank', $record);
         $record->id = $id;
-        $record->code = bank_helper::create_code($id);
+        $record->code = self::create_code($id);
         $DB->update_record('paygw_bank', $record);
-        $send_email = get_config('paygw_bank', 'sendnewrequestmail');
-        $emailaddress=get_config('paygw_bank', 'notificationsaddress');
+        $sendemail = get_config('paygw_bank', 'sendnewrequestmail');
+        $emailaddress = get_config('paygw_bank', 'notificationsaddress');
 
-        if ($send_email) {
+        if ($sendemail) {
             $supportuser = core_user::get_support_user();
             $subject = get_string('email_notifications_subject_new', 'paygw_bank');
             $contentmessage = new stdClass;
@@ -222,8 +212,7 @@ class bank_helper
         }
         return $record;
     }
-    public static function create_code($id): string
-    {
+    public static function create_code($id): string {
         return "code_" . $id;
     }
 }

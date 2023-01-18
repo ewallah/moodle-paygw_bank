@@ -39,9 +39,9 @@ if ($confirm == 1 && $id > 0) {
         $OUTPUT->notification("denied");
     }
 }
-$post_url= new moodle_url($PAGE->url, array('sesskey'=>sesskey()));
-$bank_entries = bank_helper::get_pending();
-if (!$bank_entries) {
+$posturl = new moodle_url($PAGE->url, array('sesskey' => sesskey()));
+$bankentries = bank_helper::get_pending();
+if (!$bankentries) {
     $match = array();
     echo $OUTPUT->heading(get_string('noentriesfound', 'paygw_bank'));
 
@@ -52,28 +52,28 @@ if (!$bank_entries) {
         get_string('date'), get_string('code', 'paygw_bank'), get_string('username'),  get_string('email'),
         get_string('concept', 'paygw_bank'), get_string('total_cost', 'paygw_bank'), get_string('currency'), get_string('hasfiles', 'paygw_bank'), get_string('actions')
     );
-    //$headarray=array(get_string('date'),get_string('code', 'paygw_bank'), get_string('concept', 'paygw_bank'),get_string('amount', 'paygw_bank'),get_string('currency'));
+    // $headarray=array(get_string('date'),get_string('code', 'paygw_bank'), get_string('concept', 'paygw_bank'),get_string('amount', 'paygw_bank'),get_string('currency'));
 
-    foreach ($bank_entries as $bank_entry) {
-        $config = (object) helper::get_gateway_configuration($bank_entry->component, $bank_entry->paymentarea, $bank_entry->itemid, 'bank');
-        $payable = helper::get_payable($bank_entry->component, $bank_entry->paymentarea, $bank_entry->itemid);
+    foreach ($bankentries as $bankentry) {
+        $config = (object) helper::get_gateway_configuration($bankentry->component, $bankentry->paymentarea, $bankentry->itemid, 'bank');
+        $payable = helper::get_payable($bankentry->component, $bankentry->paymentarea, $bankentry->itemid);
         $currency = $payable->get_currency();
-        $customer = $DB->get_record('user', array('id' => $bank_entry->userid));
+        $customer = $DB->get_record('user', array('id' => $bankentry->userid));
         $fullname = fullname($customer, true);
 
         // Add surcharge if there is any.
         $surcharge = helper::get_gateway_surcharge('paypal');
         $amount = helper::get_rounded_cost($payable->get_amount(), $currency, $surcharge);
-        $buttonaprobe = '<form name="formapprovepay' . $bank_entry->id . '" method="POST">
+        $buttonaprobe = '<form name="formapprovepay' . $bankentry->id . '" method="POST">
         <input type="hidden" name="sesskey" value="' .sesskey(). '">
-        <input type="hidden" name="id" value="' . $bank_entry->id . '">
+        <input type="hidden" name="id" value="' . $bankentry->id . '">
         <input type="hidden" name="action" value="A">
         <input type="hidden" name="confirm" value="1">
         <input class="btn btn-primary form-submit" type="submit" value="' . get_string('approve', 'paygw_bank') . '"></input>
         </form>';
-        $buttondeny = '<form name="formaprovepay' . $bank_entry->id . '" method="POST">
+        $buttondeny = '<form name="formaprovepay' . $bankentry->id . '" method="POST">
         <input type="hidden" name="sesskey" value="' .sesskey(). '">
-        <input type="hidden" name="id" value="' . $bank_entry->id . '">
+        <input type="hidden" name="id" value="' . $bankentry->id . '">
         <input type="hidden" name="action" value="D">
         <input type="hidden" name="confirm" value="1">
         <input class="btn btn-primary form-submit" type="submit" value="' . get_string('deny', 'paygw_bank') . '"></input>
@@ -81,18 +81,18 @@ if (!$bank_entries) {
         $files = "-";
         $hasfiles = get_string('no');
         $fs = get_file_storage();
-        $files = bank_helper::files($bank_entry->id);
-        if ($bank_entry->hasfiles > 0 || count($files)>0) {
+        $files = bank_helper::files($bankentry->id);
+        if ($bankentry->hasfiles > 0 || count($files) > 0) {
             $hasfiles = get_string('yes');
-            $hasfiles = '<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#staticBackdrop' . $bank_entry->id . '" id="launchmodal' . $bank_entry->id . '">
+            $hasfiles = '<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#staticBackdrop' . $bankentry->id . '" id="launchmodal' . $bankentry->id . '">
             View
           </button>
           <!-- Modal -->
-            <div class="modal fade" id="staticBackdrop' . $bank_entry->id . '" aria-labelledby="staticBackdropLabel' . $bank_entry->id . '" aria-hidden="true">
+            <div class="modal fade" id="staticBackdrop' . $bankentry->id . '" aria-labelledby="staticBackdropLabel' . $bankentry->id . '" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel' . $bank_entry->id . '">' . get_string('files') . '</h5>
+                    <h5 class="modal-title" id="staticBackdropLabel' . $bankentry->id . '">' . get_string('files') . '</h5>
                     <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -121,7 +121,7 @@ if (!$bank_entries) {
 
 
         $table->data[] = array(
-            date('Y-m-d', $bank_entry->timecreated), $bank_entry->code, $fullname, $customer->email, $bank_entry->description,
+            date('Y-m-d', $bankentry->timecreated), $bankentry->code, $fullname, $customer->email, $bankentry->description,
             $amount, $currency, $hasfiles, $buttonaprobe . $buttondeny
         );
     }

@@ -32,14 +32,13 @@ defined('MOODLE_INTERNAL') || die();
 require_once $CFG->libdir . '/formslib.php';
 
 
-class attachtransfer_form extends \moodleform
-{
+class attachtransfer_form extends \moodleform {
+
 
     /**
      * form definition
      */
-    public function definition()
-    {
+    public function definition() {
         global $CFG;
         $maxbytes = 0;
         if (!empty($CFG->maxbytes)) {
@@ -63,14 +62,13 @@ class attachtransfer_form extends \moodleform
             'userfile',
             get_string('file'),
             null,
-            array('maxbytes' => $maxbytes, 'accepted_types' => array('document','image'))
+            array('maxbytes' => $maxbytes, 'accepted_types' => array('document', 'image'))
         );
         $mform->addRule('userfile', null, 'required');
 
         $mform->addElement('submit', 'submitbutton', get_string('upload'));
     }
-    public function validation($data, $files)
-    {
+    public function validation($data, $files) {
         global $DB;
         $errors = parent::validation($data, $files);
         return $errors;

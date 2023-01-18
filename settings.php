@@ -33,14 +33,14 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configtext('paygw_bank/aditionalcurrencies', get_string('additional_currencies', 'paygw_bank'), get_string('additional_currencies_help', 'paygw_bank'), '', PARAM_TAGLIST));
     $settings->add(new admin_setting_configcheckbox('paygw_bank/sendconfmail', get_string('send_confirmation_mail', 'paygw_bank'), '', 0));
     $settings->add(new admin_setting_configcheckbox('paygw_bank/senddenmail', get_string('send_denied_mail', 'paygw_bank'), '', 0));
-    $settings->add(new admin_setting_heading('paygw_bank/notemails', get_string('email_notifications', 'paygw_bank'), get_string('email_notifications_help', 'paygw_bank'),));
+    $settings->add(new admin_setting_heading('paygw_bank/notemails', get_string('email_notifications', 'paygw_bank'), get_string('email_notifications_help', 'paygw_bank'), ));
     $settings->add(new admin_setting_configtext('paygw_bank/notificationsaddress', get_string('email_to_notify', 'paygw_bank'), '', '', PARAM_EMAIL));
-  
+
     $settings->add(new admin_setting_configcheckbox('paygw_bank/sendnewrequestmail', get_string('send_new_request_mail', 'paygw_bank'), '', 0));
     $settings->add(new admin_setting_configcheckbox('paygw_bank/sendnewattachmentsmail', get_string('send_new_attachments_mail', 'paygw_bank'), '', 0));
     $settings->add(new admin_setting_configcheckbox('paygw_bank/senconfirmailtosupport', get_string('send_confirm_mail_to_support', 'paygw_bank'), '', 0));
-    
-   
+
+
     \core_payment\helper::add_common_gateway_settings($settings, 'paygw_bank');
 }
 $systemcontext = \context_system::instance();

@@ -25,8 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-function paygw_bank_myprofile_navigation(core_user\output\myprofile\tree $tree, $user, $iscurrentuser, $course)
-{
+function paygw_bank_myprofile_navigation(core_user\output\myprofile\tree $tree, $user, $iscurrentuser, $course) {
     $url = new moodle_url('/payment/gateway/bank/my_pending_pay.php');
     $category = new core_user\output\myprofile\category('payments', get_string('payments', 'paygw_bank'), null);
     $node = new core_user\output\myprofile\node(
@@ -40,8 +39,7 @@ function paygw_bank_myprofile_navigation(core_user\output\myprofile\tree $tree, 
     $tree->add_node($node);
 }
 
-function paygw_bank_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = array())
-{
+function paygw_bank_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = array()) {
     if ($filearea !== 'transfer') {
         return false;
     }
@@ -68,13 +66,12 @@ function paygw_bank_pluginfile($course, $cm, $context, $filearea, $args, $forced
         return false; // The file does not exist.
     }
 
-    // We can now send the file back to the browser - in this case with a cache lifetime of 1 day and no filtering. 
+    // We can now send the file back to the browser - in this case with a cache lifetime of 1 day and no filtering.
     send_stored_file($file, 86400, 0, $forcedownload, $options);
 }
 
 if (!function_exists('str_ends_with')) {
-    function str_ends_with($str, $end)
-    {
+    function str_ends_with($str, $end) {
         return (@substr_compare($str, $end, -strlen($end)) == 0);
     }
 }

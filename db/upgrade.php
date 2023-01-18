@@ -28,13 +28,12 @@ defined('MOODLE_INTERNAL') || die();
  * @param  int $oldversion the version we are upgrading from
  * @return bool always true
  */
-function xmldb_paygw_bank_upgrade(int $oldversion): bool
-{
+function xmldb_paygw_bank_upgrade(int $oldversion): bool {
     global $DB;
-    
+
     $dbman = $DB->get_manager();
 
-    if ($oldversion <  2023011801) {
+    if ($oldversion < 2023011801) {
         // Define key paymentid (foreign-unique) to be added to paygw_paypal.
         $table = new xmldb_table('paygw_bank');
         $field = new xmldb_field('totalamount', XMLDB_TYPE_NUMBER, '15, 5', null, XMLDB_NOTNULL, null, null, 'userid');
